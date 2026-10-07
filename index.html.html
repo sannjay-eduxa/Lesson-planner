@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShikshaPlan AI - Differentiated Lesson Plan Generator</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600&family=Noto+Sans+Telugu:wght@400;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#2563eb',
+              600: '#1d4ed8',
+              700: '#1e40af',
+              900: '#1e3a8a',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Telugu', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Print Styles for professional output */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printableArea, #printableArea * {
+        visibility: visible;
+      }
+      #printableArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        background: white !important;
+        color: black !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+      table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+      }
+      th, td {
+        border: 1px solid #333 !important;
+        padding: 6px 8px !important;
+      }
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-gradient-to-tr from-blue-500 to-indigo-600 p-2.5 rounded-xl shadow-md">
+          <i class="fa-solid fa-graduation-cap text-xl text-white"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight tracking-wide">ShikshaPlan AI</h1>
+          <p class="text-xs text-slate-400">3-Tier Differentiated Lesson Planner</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="hidden sm:inline-flex items-center gap-1.5 bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-xs font-medium border border-slate-700">
+          <i class="fa-solid fa-earth-asia text-blue-400"></i> Aligned with NCF & State Boards
+        </span>
+        <button id="resetAppBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5 border border-slate-700">
+          <i class="fa-solid fa-rotate-right"></i> Reset Form
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- INPUT FORM SECTION -->
+    <div id="formSection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 transition-all">
+      <div class="mb-6 border-b border-slate-100 pb-4">
+        <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-blue-600 text-xl"></i>
+          Configure Lesson Details & Tiered Differentiation
+        </h2>
+        <p class="text-slate-500 text-sm mt-1">
+          Provide classroom context and student baseline readiness. The AI will generate a complete, differentiated lesson plan strictly adhering to school board standards.
+        </p>
+      </div>
+
+      <form id="lessonForm" class="space-y-8" onsubmit="event.preventDefault(); generateLessonPlan();">
+        
+        <!-- SECTION 1: Topic & Class Details -->
+        <div>
+          <h3 class="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">1</span>
+            Topic & Class Context
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Grade / Class Level *</label>
+              <select id="gradeLevel" required class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                <option value="">Select Grade</option>
+                <option value="Class 1">Class 1</option>
+                <option value="Class 2">Class 2</option>
+                <option value="Class 3">Class 3</option>
+                <option value="Class 4">Class 4</option>
+                <option value="Class 5">Class 5</option>
+                <option value="Class 6">Class 6</option>
+                <option value="Class 7" selected>Class 7</option>
+                <option value="Class 8">Class 8</option>
+                <option value="Class 9">Class 9</option>
+                <option value="Class 10">Class 10</option>
+                <option value="Class 11">Class 11</option>
+                <option value="Class 12">Class 12</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Subject *</label>
+              <input type="text" id="subject" required placeholder="e.g. Science / Mathematics / English" value="Science" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Main Topic *</label>
+              <input type="text" id="topic" required placeholder="e.g. Photosynthesis in Plants" value="Photosynthesis in Plants" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Sub-Topic & Duration</label>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="subTopic" placeholder="e.g. Role of Stomata" value="Role of Chlorophyll & Light" class="bg-slate-50 border border-slate-300 text-slate-900 text-xs rounded-lg p-2.5">
+                <input type="text" id="duration" placeholder="e.g. 45 mins" value="45 Minutes" class="bg-slate-50 border border-slate-300 text-slate-900 text-xs rounded-lg p-2.5">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: Regional & Language Settings -->
+        <div class="pt-4 border-t border-slate-100">
+          <h3 class="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">2</span>
+            Regional & Language Alignment
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Target Language for Output *</label>
+              <select id="targetLanguage" required class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                <option value="English" selected>English</option>
+                <option value="Hindi">Hindi (हिन्दी)</option>
+                <option value="Marathi">Marathi (मराठी)</option>
+                <option value="Tamil">Tamil (தமிழ்)</option>
+                <option value="Telugu">Telugu (తెలుగు)</option>
+                <option value="Bengali">Bengali (বাংলা)</option>
+                <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+                <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+                <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
+                <option value="Malayalam">Malayalam (മലയാളം)</option>
+                <option value="Odia">Odia (ଓଡ଼ିଆ)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Indian State / Board Context *</label>
+              <select id="stateBoard" required class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                <option value="NCERT / CBSE (National)" selected>NCERT / CBSE (National Framework)</option>
+                <option value="Maharashtra (State Board - Balbharati)">Maharashtra (State Board - Balbharati)</option>
+                <option value="Uttar Pradesh (UP Board)">Uttar Pradesh (UP Board)</option>
+                <option value="Tamil Nadu (Samacheer Kalvi)">Tamil Nadu (Samacheer Kalvi)</option>
+                <option value="Karnataka (KSEEB)">Karnataka (KSEEB)</option>
+                <option value="West Bengal (WBBSE)">West Bengal (WBBSE)</option>
+                <option value="Telangana / Andhra Pradesh (SCERT)">Telangana / Andhra Pradesh (SCERT)</option>
+                <option value="Gujarat (GSEB)">Gujarat (GSEB)</option>
+                <option value="ICSE / CISCE Board">ICSE / CISCE Board</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: 3-Tier Differentiation & Previous Knowledge -->
+        <div class="pt-4 border-t border-slate-100">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-slate-800 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">3</span>
+              3-Tier Differentiation & Previous Knowledge Mapping
+            </h3>
+            <span class="text-xs bg-amber-50 text-amber-700 font-medium px-2.5 py-1 rounded-md border border-amber-200">
+              <i class="fa-solid fa-lightbulb"></i> Crucial for tailored pedagogy
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Tier 1: Below Grade Level -->
+            <div class="bg-amber-50/60 border border-amber-200 rounded-xl p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-amber-800 uppercase tracking-wide flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-down text-amber-600"></i> Below Grade Level
+                  </span>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="block text-xs text-amber-900 font-medium mb-1">Functional Learning Level</label>
+                  <input type="text" id="belowGradeLevel" placeholder="e.g. Reading at Class 4 level" value="Functional Class 4 level in Science" class="w-full bg-white border border-amber-300 text-slate-800 text-xs rounded-lg p-2 focus:ring-amber-500 focus:border-amber-500">
+                </div>
+
+                <div>
+                  <label class="block text-xs text-amber-900 font-medium mb-1">Previous Knowledge / Baseline Gaps</label>
+                  <textarea id="belowGradeKnowledge" rows="3" placeholder="What foundational concepts do they currently know or struggle with?" class="w-full bg-white border border-amber-300 text-slate-800 text-xs rounded-lg p-2 focus:ring-amber-500 focus:border-amber-500">Knows plants need water and sunlight, but struggles with cellular structure, chemical equations, or specialized terms like chlorophyll.</textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tier 2: At Grade Level -->
+            <div class="bg-blue-50/60 border border-blue-200 rounded-xl p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-blue-800 uppercase tracking-wide flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-blue-600"></i> At Grade Level
+                  </span>
+                  <span class="text-[10px] bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded">Standard</span>
+                </div>
+
+                <div class="mb-3">
+                  <label class="block text-xs text-blue-900 font-medium mb-1">Target Grade Readiness</label>
+                  <input type="text" disabled value="Grade Level (Class 7 Standard)" class="w-full bg-blue-100/60 border border-blue-200 text-slate-700 text-xs rounded-lg p-2 cursor-not-allowed">
+                </div>
+
+                <div>
+                  <label class="block text-xs text-blue-900 font-medium mb-1">Previous Knowledge / Baseline Skills</label>
+                  <textarea id="atGradeKnowledge" rows="3" placeholder="What prerequisite concepts do standard students possess?" class="w-full bg-white border border-blue-300 text-slate-800 text-xs rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500">Understands basic plant organs (roots, leaves, stem) and knows that leaves produce food; familiar with basic gas exchange concepts.</textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tier 3: Above Grade Level -->
+            <div class="bg-emerald-50/60 border border-emerald-200 rounded-xl p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-emerald-800 uppercase tracking-wide flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-up text-emerald-600"></i> Above Grade Level
+                  </span>
+                  <span class="text-[10px] bg-emerald-100 text-emerald-700 font-semibold px-2 py-0.5 rounded">Advanced</span>
+                </div>
+
+                <div class="mb-3">
+                  <label class="block text-xs text-emerald-900 font-medium mb-1">Enrichment Level</label>
+                  <input type="text" id="aboveGradeLevel" placeholder="e.g. High analytical ability / Class 8+ readiness" value="Advanced analytical & Class 8 readiness" class="w-full bg-white border border-emerald-300 text-slate-800 text-xs rounded-lg p-2 focus:ring-emerald-500 focus:border-emerald-500">
+                </div>
+
+                <div>
+                  <label class="block text-xs text-emerald-900 font-medium mb-1">Previous Knowledge / Baseline Skills</label>
+                  <textarea id="aboveGradeKnowledge" rows="3" placeholder="What advanced baseline or fast-learner skills do they demonstrate?" class="w-full bg-white border border-emerald-300 text-slate-800 text-xs rounded-lg p-2 focus:ring-emerald-500 focus:border-emerald-500">Grasps balanced chemical reactions, understands chloroplast structure, and can link photosynthesis to ecosystem oxygen-carbon cycles.</textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-4 flex items-center justify-end">
+          <button type="submit" id="generateBtn" class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-8 py-3.5 rounded-xl shadow-md transition flex items-center justify-center gap-3 text-base">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Differentiated Lesson Plan
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div id="loadingState" class="hidden my-12 text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm">
+      <div class="inline-flex items-center justify-center p-4 bg-blue-50 text-blue-600 rounded-full mb-4 animate-bounce">
+        <i class="fa-solid fa-brain text-3xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-slate-800 mb-2">Designing Your Custom Differentiated Lesson Plan...</h3>
+      <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">
+        Synthesizing pedagogical strategies, curriculum mapping, and 3-tier differentiation for <span id="loadingLangLabel" class="font-semibold text-blue-600">English</span> output.
+      </p>
+      <div class="w-64 h-2 bg-slate-100 rounded-full mx-auto overflow-hidden">
+        <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 animate-pulse w-3/4 rounded-full"></div>
+      </div>
+    </div>
+
+    <!-- OUTPUT SECTION -->
+    <div id="outputSection" class="hidden space-y-6">
+      
+      <!-- Top Actions Bar -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4 no-print">
+        <div class="flex items-center gap-2">
+          <button id="backToEditBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+            <i class="fa-solid fa-pen-to-square"></i> Edit Parameters
+          </button>
+          <button id="adjustDiffModalBtn" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+            <i class="fa-solid fa-layer-group"></i> Quick Adjust Differentiation
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="copyLessonPlanText()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+            <i class="fa-regular fa-copy"></i> Copy Text
+          </button>
+          <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-2">
+            <i class="fa-solid fa-print"></i> Print / Save PDF
+          </button>
+          <button id="createNewBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i> New Lesson Plan
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Lesson Plan Template View -->
+      <div id="printableArea" class="bg-white rounded-2xl shadow-sm border border-slate-300 p-6 sm:p-10 text-slate-900">
+        
+        <!-- Document Header / Title -->
+        <div class="border-b-2 border-slate-800 pb-4 mb-6">
+          <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-500" id="boardTag">NCERT / STATE BOARD CURRICULUM PLAN</span>
+            <span class="text-xs font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded" id="langTag">Language: English</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight" id="outMainTitle">LESSON PLANNING TEMPLATE</h1>
+        </div>
+
+        <!-- Grade, Duration, Topic Metadata Table -->
+        <div class="overflow-x-auto mb-6">
+          <table class="w-full text-sm border-collapse border border-slate-400">
+            <tbody>
+              <tr class="bg-slate-50">
+                <td class="border border-slate-400 p-2.5 font-bold w-1/6 bg-slate-100">Grade / Section:</td>
+                <td class="border border-slate-400 p-2.5 w-2/6" id="outGradeSec">-</td>
+                <td class="border border-slate-400 p-2.5 font-bold w-1/6 bg-slate-100">Duration:</td>
+                <td class="border border-slate-400 p-2.5 w-2/6" id="outDuration">-</td>
+              </tr>
+              <tr class="bg-slate-50">
+                <td class="border border-slate-400 p-2.5 font-bold bg-slate-100">Topic:</td>
+                <td class="border border-slate-400 p-2.5" id="outTopic">-</td>
+                <td class="border border-slate-400 p-2.5 font-bold bg-slate-100">Sub-topic:</td>
+                <td class="border border-slate-400 p-2.5" id="outSubTopic">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- LEARNING OUTCOMES -->
+        <div class="mb-6 border border-slate-400 rounded-sm overflow-hidden">
+          <div class="bg-slate-800 text-white px-3 py-2 font-bold text-sm tracking-wide flex items-center justify-between">
+            <span>LEARNING OUTCOMES (from the vertical & horizontal spiral)</span>
+          </div>
+          <div class="p-4 bg-white text-sm">
+            <p class="font-semibold text-slate-700 mb-2">By the end of the lesson, students will be able to:</p>
+            <ol class="list-decimal pl-5 space-y-1.5" id="outOutcomes">
+              <!-- Dynamically populated -->
+            </ol>
+          </div>
+        </div>
+
+        <!-- 3-TIER PREVIOUS KNOWLEDGE MAPPING -->
+        <div class="mb-6 border border-slate-400 rounded-sm overflow-hidden">
+          <div class="bg-slate-800 text-white px-3 py-2 font-bold text-sm tracking-wide">
+            3-TIER PREVIOUS KNOWLEDGE & BASELINE MAPPING
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-300 text-xs">
+            <div class="p-3 bg-amber-50/50">
+              <span class="font-bold text-amber-900 block mb-1">Below Grade Level (<span id="outBelowLevelLabel">Level</span>)</span>
+              <p class="text-slate-700" id="outBelowKnowledgeText">-</p>
+            </div>
+            <div class="p-3 bg-blue-50/50">
+              <span class="font-bold text-blue-900 block mb-1">At Grade Level (Class Standard)</span>
+              <p class="text-slate-700" id="outAtKnowledgeText">-</p>
+            </div>
+            <div class="p-3 bg-emerald-50/50">
+              <span class="font-bold text-emerald-900 block mb-1">Above Grade Level (<span id="outAboveLevelLabel">Enrichment</span>)</span>
+              <p class="text-slate-700" id="outAboveKnowledgeText">-</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- FLOW OF THE LESSON (Table Format matching Template) -->
+        <div class="mb-6">
+          <div class="bg-slate-800 text-white px-3 py-2 font-bold text-sm tracking-wide rounded-t-sm">
+            FLOW OF THE LESSON
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs sm:text-sm border-collapse border border-slate-400">
+              <thead>
+                <tr class="bg-slate-100 text-slate-800 font-bold">
+                  <th class="border border-slate-400 p-2 text-left w-16">Time</th>
+                  <th class="border border-slate-400 p-2 text-left w-1/3">Stage & Teaching / Main Activity</th>
+                  <th class="border border-slate-400 p-2 text-left w-1/4">Resources</th>
+                  <th class="border border-slate-400 p-2 text-left">Engagement / Differentiation Activities (Pair work, grouping, scaffolding)</th>
+                </tr>
+              </thead>
+              <tbody id="outFlowTableBody">
+                <!-- Dynamically populated Warm up, Main, Conclusion -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 3-TIER DIFFERENTIATED INSTRUCTIONAL MATRIX -->
+        <div class="mb-6 border border-slate-400 rounded-sm overflow-hidden">
+          <div class="bg-slate-800 text-white px-3 py-2 font-bold text-sm tracking-wide">
+            DETAILED 3-TIER DIFFERENTIATED ACTION PLAN
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs border-collapse border border-slate-400">
+              <thead>
+                <tr class="bg-slate-100 text-slate-800 font-bold">
+                  <th class="border border-slate-400 p-2 w-1/3 text-amber-900 bg-amber-100/70">Below Grade Level Tasks & Scaffolding</th>
+                  <th class="border border-slate-400 p-2 w-1/3 text-blue-900 bg-blue-100/70">At Grade Level Core Tasks</th>
+                  <th class="border border-slate-400 p-2 w-1/3 text-emerald-900 bg-emerald-100/70">Above Grade Level Extension & Challenge</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="border border-slate-400 p-3 align-top bg-amber-50/20" id="outTierBelowDetail">-</td>
+                  <td class="border border-slate-400 p-3 align-top bg-blue-50/20" id="outTierAtDetail">-</td>
+                  <td class="border border-slate-400 p-3 align-top bg-emerald-50/20" id="outTierAboveDetail">-</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ASSESSMENTS -->
+        <div class="mb-6">
+          <div class="bg-slate-800 text-white px-3 py-2 font-bold text-sm tracking-wide rounded-t-sm">
+            ASSESSMENTS
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs sm:text-sm border-collapse border border-slate-400">
+              <thead>
+                <tr class="bg-slate-100 font-bold text-slate-800">
+                  <th class="border border-slate-400 p-2 w-1/4">Type of Assessment</th>
+                  <th class="border border-slate-400 p-2 w-1/2">Details & Tiered Questions</th>
+                  <th class="border border-slate-400 p-2 w-1/6">Rubrics (Criteria / Links)</th>
+                  <th class="border border-slate-400 p-2 w-1/6">Submission Date</th>
+                </tr>
+              </thead>
+              <tbody id="outAssessmentTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- LEARNER PROGRESSION -->
+        <div class="mb-6">
+          <div class="bg-slate-800 text-white px-3 py-2 font-bold text-sm tracking-wide rounded-t-sm">
+            LEARNER PROGRESSION
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs sm:text-sm border-collapse border border-slate-400">
+              <thead>
+                <tr class="bg-slate-100 font-bold text-slate-800">
+                  <th class="border border-slate-400 p-2 w-1/3">Facet of Learner Progression</th>
+                  <th class="border border-slate-400 p-2">How is it being addressed in this lesson?</th>
+                </tr>
+              </thead>
+              <tbody id="outProgressionTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- HOMEWORK -->
+        <div class="mb-2">
+          <div class="bg-slate-800 text-white px-3 py-2 font-bold text-sm tracking-wide rounded-t-sm">
+            HOMEWORK / EXTENSION
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs sm:text-sm border-collapse border border-slate-400">
+              <thead>
+                <tr class="bg-slate-100 font-bold text-slate-800">
+                  <th class="border border-slate-400 p-2 w-1/2">Details (with differentiated worksheets/tasks)</th>
+                  <th class="border border-slate-400 p-2 w-1/4">Due Date</th>
+                  <th class="border border-slate-400 p-2 w-1/4">Resources Needed for HW</th>
+                </tr>
+              </thead>
+              <tbody id="outHomeworkTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- QUICK ADJUST DIFFERENTIATION MODAL -->
+  <div id="diffModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-2xl w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-indigo-600"></i> Quick Adjust Learning Levels & Baseline
+        </h3>
+        <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-500">
+        Update baseline skills or specific student challenges below to re-generate the lesson plan instantly.
+      </p>
+
+      <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+        <div>
+          <label class="block text-xs font-bold text-amber-800 mb-1">Below Grade Level Adjustment:</label>
+          <input type="text" id="modalBelowLevel" class="w-full text-xs p-2 border border-slate-300 rounded mb-1">
+          <textarea id="modalBelowKnow" rows="2" class="w-full text-xs p-2 border border-slate-300 rounded"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-blue-800 mb-1">At Grade Level Adjustment:</label>
+          <textarea id="modalAtKnow" rows="2" class="w-full text-xs p-2 border border-slate-300 rounded"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-emerald-800 mb-1">Above Grade Level Adjustment:</label>
+          <input type="text" id="modalAboveLevel" class="w-full text-xs p-2 border border-slate-300 rounded mb-1">
+          <textarea id="modalAboveKnow" rows="2" class="w-full text-xs p-2 border border-slate-300 rounded"></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+        <button id="cancelModalBtn" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+        <button id="applyModalBtn" class="px-5 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow">
+          Apply & Regenerate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global variable to hold generated plan data
+    let currentPlanData = null;
+
+    // UI Event Listeners Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('resetAppBtn').addEventListener('click', resetForm);
+      document.getElementById('backToEditBtn').addEventListener('click', showFormView);
+      document.getElementById('createNewBtn').addEventListener('click', resetForm);
+      
+      // Modal listeners
+      document.getElementById('adjustDiffModalBtn').addEventListener('click', openDiffModal);
+      document.getElementById('closeModalBtn').addEventListener('click', closeDiffModal);
+      document.getElementById('cancelModalBtn').addEventListener('click', closeDiffModal);
+      document.getElementById('applyModalBtn').addEventListener('click', applyModalAdjustments);
+    });
+
+    function resetForm() {
+      showFormView();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showFormView() {
+      document.getElementById('formSection').classList.remove('hidden');
+      document.getElementById('outputSection').classList.add('hidden');
+      document.getElementById('loadingState').classList.add('hidden');
+    }
+
+    function showLoadingView(lang) {
+      document.getElementById('formSection').classList.add('hidden');
+      document.getElementById('outputSection').classList.add('hidden');
+      document.getElementById('loadingState').classList.remove('hidden');
+      document.getElementById('loadingLangLabel').textContent = lang;
+    }
+
+    function showOutputView() {
+      document.getElementById('formSection').classList.add('hidden');
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('outputSection').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Modal Control
+    function openDiffModal() {
+      document.getElementById('modalBelowLevel').value = document.getElementById('belowGradeLevel').value;
+      document.getElementById('modalBelowKnow').value = document.getElementById('belowGradeKnowledge').value;
+      document.getElementById('modalAtKnow').value = document.getElementById('atGradeKnowledge').value;
+      document.getElementById('modalAboveLevel').value = document.getElementById('aboveGradeLevel').value;
+      document.getElementById('modalAboveKnow').value = document.getElementById('aboveGradeKnowledge').value;
+      
+      document.getElementById('diffModal').classList.remove('hidden');
+    }
+
+    function closeDiffModal() {
+      document.getElementById('diffModal').classList.add('hidden');
+    }
+
+    function applyModalAdjustments() {
+      document.getElementById('belowGradeLevel').value = document.getElementById('modalBelowLevel').value;
+      document.getElementById('belowGradeKnowledge').value = document.getElementById('modalBelowKnow').value;
+      document.getElementById('atGradeKnowledge').value = document.getElementById('modalAtKnow').value;
+      document.getElementById('aboveGradeLevel').value = document.getElementById('modalAboveLevel').value;
+      document.getElementById('aboveGradeKnowledge').value = document.getElementById('modalAboveKnow').value;
+      
+      closeDiffModal();
+      generateLessonPlan();
+    }
+
+    async function generateLessonPlan() {
+      const grade = document.getElementById('gradeLevel').value;
+      const subject = document.getElementById('subject').value;
+      const topic = document.getElementById('topic').value;
+      const subTopic = document.getElementById('subTopic').value || 'General Overview';
+      const duration = document.getElementById('duration').value || '45 Minutes';
+      const targetLang = document.getElementById('targetLanguage').value;
+      const stateBoard = document.getElementById('stateBoard').value;
+
+      const belowLevel = document.getElementById('belowGradeLevel').value;
+      const belowKnow = document.getElementById('belowGradeKnowledge').value;
+      const atKnow = document.getElementById('atGradeKnowledge').value;
+      const aboveLevel = document.getElementById('aboveGradeLevel').value;
+      const aboveKnow = document.getElementById('aboveGradeKnowledge').value;
+
+      showLoadingView(targetLang);
+
+      // System prompt defining persona & strict structure output
+      const systemPrompt = `You are a Master Instructional Designer & Senior Pedagogy Specialist in Indian School Education (NCERT / CBSE / State Boards).
+Your task is to generate a comprehensive, highly structured 3-tier differentiated lesson plan.
+
+CRITICAL INSTRUCTION FOR LANGUAGE:
+All titles, table headers, content, activities, questions, and explanations MUST be written in the specified TARGET LANGUAGE: ${targetLang}.
+If the Target Language is Hindi, Marathi, Tamil, Telugu, Bengali, Kannada, Gujarati, Punjabi, Malayalam, Odia, etc., write ALL content natively in that language script.
+
+STRICT JSON OUTPUT FORMAT:
+You must return ONLY a JSON object with this exact schema:
+{
+  "curriculumBoard": "String e.g. NCERT / CBSE or State Board",
+  "gradeSection": "String",
+  "duration": "String",
+  "topic": "String",
+  "subTopic": "String",
+  "learningOutcomes": ["Outcome 1", "Outcome 2", "Outcome 3"],
+  "previousKnowledge": {
+    "belowGrade": { "level": "String", "summary": "String" },
+    "atGrade": { "level": "Grade Level", "summary": "String" },
+    "aboveGrade": { "level": "String", "summary": "String" }
+  },
+  "lessonFlow": [
+    {
+      "stage": "Introduction / Warm Up",
+      "time": "10 Mins",
+      "teachingActivity": "Detailed step-by-step warmup activity",
+      "resources": "List of physical/digital resources",
+      "differentiationEngagement": "Specific group/pair activity tailored by tier"
+    },
+    {
+      "stage": "Main Activity / Direct Instruction",
+      "time": "25 Mins",
+      "teachingActivity": "Core concepts explanation and interactive demonstration",
+      "resources": "List of resources/charts/experiments",
+      "differentiationEngagement": "Tiered small group tasks and guided practice"
+    },
+    {
+      "stage": "Conclusion / Consolidation",
+      "time": "10 Mins",
+      "teachingActivity": "Synthesis, key takeaways, check for understanding",
+      "resources": "Exit slip / Summary chart",
+      "differentiationEngagement": "Tiered exit question or verbal summary"
+    }
+  ],
+  "tieredInstruction": {
+    "belowGrade": "Detailed scaffolded tasks, visual aids, guided instruction, simplified key terms",
+    "atGrade": "Core grade-level tasks, collaborative peer problem solving, standard worksheets",
+    "aboveGrade": "Enrichment tasks, open-ended enquiry, peer tutoring role, higher-order analysis"
+  },
+  "assessments": [
+    {
+      "type": "Formative / Exit Ticket",
+      "details": "Tiered assessment questions (1 easy, 1 core, 1 challenge)",
+      "rubric": "Evaluation criteria link/descriptors",
+      "submissionDate": "End of period / Next day"
+    }
+  ],
+  "learnerProgression": [
+    {
+      "facet": "Conceptual Understanding",
+      "howAddressed": "Explanation of how progressive understanding is built"
+    },
+    {
+      "facet": "Critical Thinking & Application",
+      "howAddressed": "Explanation of how inquiry and problem-solving are cultivated"
+    }
+  ],
+  "homework": {
+    "details": "Differentiated HW tasks assigned according to 3 tiers",
+    "dueDate": "Next Class",
+    "resourcesNeeded": "Worksheet link / Textbook page"
+  }
+}`;
+
+      const userPrompt = `Generate a 3-tier differentiated lesson plan with the following inputs:
+- Class/Grade: ${grade}
+- Subject: ${subject}
+- Main Topic: ${topic}
+- Sub-topic: ${subTopic}
+- Duration: ${duration}
+- Target Language: ${targetLang}
+- State Board / Curriculum Context: ${stateBoard}
+
+3-TIER PREVIOUS KNOWLEDGE & BASELINE:
+1) Below Grade Level (${belowLevel}): ${belowKnow}
+2) At Grade Level (Standard Class Baseline): ${atKnow}
+3) Above Grade Level (${aboveLevel}): ${aboveKnow}`;
+
+      const apiKey = "";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+      const payload = {
+        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        generationConfig: {
+          responseMimeType: "application/json"
+        }
+      };
+
+      try {
+        let response = await fetchWithRetry(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!jsonText) {
+          throw new Error("No output generated from AI model.");
+        }
+
+        const parsedData = JSON.parse(jsonText);
+        currentPlanData = parsedData;
+
+        renderLessonPlan(parsedData, targetLang, stateBoard);
+        showOutputView();
+
+      } catch (err) {
+        console.error("Error generating lesson plan:", err);
+        alert("Failed to generate lesson plan. Please check network connection and try again.\nError: " + err.message);
+        showFormView();
+      }
+    }
+
+    // Exponential Backoff Fetch Helper
+    async function fetchWithRetry(url, options, maxRetries = 3) {
+      let delay = 1000;
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          const res = await fetch(url, options);
+          if (res.status === 429) {
+            await new Promise(r => setTimeout(r, delay));
+            delay *= 2;
+            continue;
+          }
+          if (!res.ok) {
+            throw new Error(`HTTP Error ${res.status}`);
+          }
+          return res;
+        } catch (e) {
+          if (i === maxRetries - 1) throw e;
+          await new Promise(r => setTimeout(r, delay));
+          delay *= 2;
+        }
+      }
+    }
+
+    function renderLessonPlan(data, language, board) {
+      document.getElementById('boardTag').textContent = board.toUpperCase();
+      document.getElementById('langTag').textContent = `Language: ${language}`;
+      
+      document.getElementById('outMainTitle').textContent = `LESSON PLANNING TEMPLATE: ${data.topic.toUpperCase()}`;
+      document.getElementById('outGradeSec').textContent = `${data.gradeSection} (${document.getElementById('subject').value})`;
+      document.getElementById('outDuration').textContent = data.duration;
+      document.getElementById('outTopic').textContent = data.topic;
+      document.getElementById('outSubTopic').textContent = data.subTopic;
+
+      // Learning outcomes
+      const outcomesEl = document.getElementById('outOutcomes');
+      outcomesEl.innerHTML = '';
+      (data.learningOutcomes || []).forEach(outcome => {
+        const li = document.createElement('li');
+        li.textContent = outcome;
+        outcomesEl.appendChild(li);
+      });
+
+      // Tiered Previous Knowledge
+      document.getElementById('outBelowLevelLabel').textContent = data.previousKnowledge?.belowGrade?.level || 'Below Level';
+      document.getElementById('outBelowKnowledgeText').textContent = data.previousKnowledge?.belowGrade?.summary || '-';
+      document.getElementById('outAtKnowledgeText').textContent = data.previousKnowledge?.atGrade?.summary || '-';
+      document.getElementById('outAboveLevelLabel').textContent = data.previousKnowledge?.aboveGrade?.level || 'Enrichment';
+      document.getElementById('outAboveKnowledgeText').textContent = data.previousKnowledge?.aboveGrade?.summary || '-';
+
+      // Lesson Flow Table
+      const flowBody = document.getElementById('outFlowTableBody');
+      flowBody.innerHTML = '';
+      (data.lessonFlow || []).forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="border border-slate-400 p-2.5 font-bold bg-slate-50 text-slate-700">${escapeHtml(item.time)}</td>
+          <td class="border border-slate-400 p-2.5">
+            <strong class="block text-slate-900 mb-1">${escapeHtml(item.stage)}</strong>
+            <p class="text-slate-700 whitespace-pre-line">${escapeHtml(item.teachingActivity)}</p>
+          </td>
+          <td class="border border-slate-400 p-2.5 text-slate-700 whitespace-pre-line">${escapeHtml(item.resources)}</td>
+          <td class="border border-slate-400 p-2.5 text-slate-700 whitespace-pre-line">${escapeHtml(item.differentiationEngagement)}</td>
+        `;
+        flowBody.appendChild(tr);
+      });
+
+      // 3-Tier Instruction Detail Matrix
+      document.getElementById('outTierBelowDetail').innerHTML = `<p class="whitespace-pre-line">${escapeHtml(data.tieredInstruction?.belowGrade || '-')}</p>`;
+      document.getElementById('outTierAtDetail').innerHTML = `<p class="whitespace-pre-line">${escapeHtml(data.tieredInstruction?.atGrade || '-')}</p>`;
+      document.getElementById('outTierAboveDetail').innerHTML = `<p class="whitespace-pre-line">${escapeHtml(data.tieredInstruction?.aboveGrade || '-')}</p>`;
+
+      // Assessments Table
+      const assessBody = document.getElementById('outAssessmentTableBody');
+      assessBody.innerHTML = '';
+      (data.assessments || []).forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="border border-slate-400 p-2.5 font-bold">${escapeHtml(item.type)}</td>
+          <td class="border border-slate-400 p-2.5 whitespace-pre-line">${escapeHtml(item.details)}</td>
+          <td class="border border-slate-400 p-2.5">${escapeHtml(item.rubric || 'Standard Criterion')}</td>
+          <td class="border border-slate-400 p-2.5">${escapeHtml(item.submissionDate || 'End of class')}</td>
+        `;
+        assessBody.appendChild(tr);
+      });
+
+      // Learner Progression Table
+      const progBody = document.getElementById('outProgressionTableBody');
+      progBody.innerHTML = '';
+      (data.learnerProgression || []).forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="border border-slate-400 p-2.5 font-bold bg-slate-50">${escapeHtml(item.facet)}</td>
+          <td class="border border-slate-400 p-2.5 whitespace-pre-line">${escapeHtml(item.howAddressed)}</td>
+        `;
+        progBody.appendChild(tr);
+      });
+
+      // Homework Table
+      const hwBody = document.getElementById('outHomeworkTableBody');
+      hwBody.innerHTML = '';
+      if (data.homework) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="border border-slate-400 p-2.5 whitespace-pre-line">${escapeHtml(data.homework.details || '-')}</td>
+          <td class="border border-slate-400 p-2.5 font-semibold">${escapeHtml(data.homework.dueDate || 'Next Class')}</td>
+          <td class="border border-slate-400 p-2.5">${escapeHtml(data.homework.resourcesNeeded || 'Textbook')}</td>
+        `;
+        hwBody.appendChild(tr);
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function copyLessonPlanText() {
+      if (!currentPlanData) return;
+      const printableText = document.getElementById('printableArea').innerText;
+      
+      // Fallback clipboard execCommand for iframe security constraints
+      const tempTextArea = document.createElement("textarea");
+      tempTextArea.value = printableText;
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      try {
+        document.execCommand('copy');
+        alert("Lesson plan copied to clipboard!");
+      } catch (err) {
+        alert("Unable to copy automatically. Please select the text manually.");
+      }
+      document.body.removeChild(tempTextArea);
+    }
+  </script>
+</body>
+</html>
